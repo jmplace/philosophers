@@ -23,8 +23,18 @@ typedef struct      s_rules
     int meals_cap;
 }                   t_rules;
 
-/*      setup           */
-void init_rules(char **av);
+typedef struct  s_mutex
+{
+    int nthread;
+    pthread_mutex_t mx;
+}                   t_mutex;
+
+
+// /*      setup           */
+
+// t_rules init_rules(char **av);
+// void *thread_1(void *arg);
+// void    thread_init(pthread_t *thread, int nthread);
 
 /*      utilities       */
 int ft_atoi(char *str);
