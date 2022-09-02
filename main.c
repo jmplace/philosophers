@@ -22,17 +22,23 @@ void    *th_init(void *arg)
     mutex = (t_mutex *)arg;
     // nth = (int *)arg;
     pthread_mutex_lock(&(*mutex).mx);
-    printf("\e[0;91mOn est dans le thread n°%d\033[0;39m\n", mutex->nthread);
+    mutex->nthread++;
+    // printf("\e[0;91mOn est dans le thread n°%d\033[0;39m\n", mutex->nthread);
     pthread_mutex_unlock(&(*mutex).mx);
+    printf("\e[0;91mL'int dans le mutex est à %d\e[0m\n", mutex->nthread);
     pthread_exit(EXIT_SUCCESS);
 }
 
-void    thread_init(pthread_t *thread, t_mutex mutex)
-{
-    pthread_create(thread, NULL, &th_init, &mutex);
-    // pthread_join(thread, NULL);
-    return ;
-}
+// void    thread_init(pthread_t *thread, t_mutex mutex)
+// {
+//     int err;
+
+//     err = pthread_create(thread, NULL, &th_init, &mutex);
+//     if (err != 0)
+//         printf("Un thread n'a pas pu être créé.\n");
+//     // pthread_join(thread, NULL);
+//     return ;
+// }
 
 int main(int ac, char **av)
 {
@@ -41,6 +47,7 @@ int main(int ac, char **av)
     pthread_t **tab;
     t_mutex mutex;
     int cpt;
+    int err;
 
     cpt = 0;
     mutex.nthread = 0;
@@ -62,15 +69,19 @@ int main(int ac, char **av)
     // }
     while (cpt < n_towr)
     {
-        mutex.nthread = cpt;
-        thread_init(tab[cpt], mutex);
+        // mutex.nthread = cpt;
+        // thread_init(tab[cpt], mutex);
+        err = pthread_create(tab[cpt], NULL, &th_init, &mutex);
+        if (err != 0)
+            printf("Un thread n'a pas pu être créé.\n");
         cpt++;
-        printf("\033[0;92mLe thread n°%d a été créé.\n-----------------\033[0;39m\n", cpt);
+        printf("\033[0;92mLe thread n°%d a été créé.\n-----------------\e[0m\n", cpt);
     }
     cpt = 0;
     while (cpt < n_towr)
     {
         pthread_join(*tab[cpt], NULL);
+        printf("\e[0;34mWaiting for a thread to end.\e[0m\n");
         cpt++;
     }
     pthread_mutex_destroy(&mutex.mx);
