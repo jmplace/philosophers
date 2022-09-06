@@ -2,32 +2,25 @@
 # define PHILOSOPHERS_H
 
 #include <stdio.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <sys/time.h>
 #include <stdlib.h>
 
-typedef struct      s_philo
+typedef struct      s_list
 {
-    int id;
-    int state;
-}                   t_philo;
-
+    pthread_mutex_t fork;
+	struct s_list	*next;
+}			        t_list;
 
 typedef struct      s_rules
 {
-    int philo_id;
     int t_death;
     int t_eat;
     int t_sleep;
-    int t_think;
+    int last_meal;
     int meals_cap;
 }                   t_rules;
-
-typedef struct  s_mutex
-{
-    int nthread;
-    pthread_mutex_t mx;
-}                   t_mutex;
 
 
 // /*      setup           */
@@ -36,7 +29,11 @@ typedef struct  s_mutex
 // void *thread_1(void *arg);
 // void    thread_init(pthread_t *thread, int nthread);
 
+/*      chained list utilities       */
+void    addback(t_list **cutlery);
 /*      utilities       */
+void    ft_print_nl(char *str);
+int     ft_strlen(char *str);
 int ft_atoi(char *str);
 int ft_is_numeric(char b);
 int ft_is_operand(char b);
