@@ -15,98 +15,44 @@
 
 // }
 
-// void    *th_init(void *arg)
-// {
-//     t_mutex *mutex;
+void    *philosopher(void *arg)
+{
+    t_list *fork;
 
-//     mutex = (t_mutex *)arg;
-//     pthread_mutex_lock(&(*mutex).mx);
-//     mutex->nthread++;
-//     pthread_mutex_unlock(&(*mutex).mx);
-//     printf("\e[0;91mL'int dans le mutex est à %d\e[0m\n", mutex->nthread);
-//     pthread_exit(EXIT_SUCCESS);
-// }
-
-// void    threadinit(pthread_t *thread, t_mutex *mutex)
-// {
-//     int err;
-
-//     err = pthread_create(thread, NULL, &th_init, mutex);
-//     if (err != 0)
-//         printf("Un thread n'a pas pu être créé.\n");
-//     return ;
-// }
-
+    ft_print_nl("bonjour");
+    fork = (t_list *)arg;
+    pthread_mutex_lock(&(*fork).fork_status);
+    pthread_mutex_unlock(&(*fork).fork_status);
+    printf("\e[0;91mOn est dans le thread et on a rien a afficher\e[0m\n");
+    pthread_exit(EXIT_SUCCESS);
+}
 
 int main(int ac, char **av)
 {
     int nphilo;
     pthread_t **table;
     t_list *cutlery = NULL;
+    t_list *fork;
     int i;
+    int err;
 
     i = 0;
+    err = 0;
     nphilo = ft_atoi(av[1]);
     table = malloc(sizeof(pthread_t *) * nphilo);
     while(i != nphilo)
     {
-        addback(&cutlery);
-        // ft_print_nl("un maillon ajouté");
+        table[i] = malloc(sizeof(pthread_t));
+        fork = addback(&cutlery);
+        printf("%p\n", fork);
+        err = pthread_create(table[i], NULL, &philosopher, fork);
         i++;
     }
-    // i = 0;
-    // while(i != (nphilo + 1))
-    // {
-    //     printf("%p\n", cutlery);
-    //     cutlery = cutlery->next;
-    //     i++;
-    // }
+    while(i != nphilo)
+    {
+        pthread_join(*table[i], NULL);
+        i++;
+    }
+    destroy_cutlery(cutlery);
     return (0);
 }
-
-// int main(int ac, char **av)
-// {
-//     int n_towr;
-//     pthread_t **tab;
-//     t_mutex *mutex;
-//     int cpt;
-//     // int err;
-
-//     mutex = malloc(sizeof(t_mutex));
-//     cpt = 0;
-//     mutex->nthread = 0;
-//     n_towr = ft_atoi(av[1]);
-//     tab = malloc(sizeof(pthread_t *) * n_towr);
-//     pthread_mutex_init(&mutex->mx, NULL);
-//     while (cpt < n_towr)
-//     {
-//         tab[cpt] = malloc(sizeof(pthread_t));
-//         cpt++;
-//     }
-//     cpt = 0;
-//     if (tab == NULL)
-//         return (1);
-//     // if (ac != 4 || ac != 5)
-//     // {
-//     //     printf("Error: too few arguments.");
-//     //     return (1);
-//     // }
-//     while (cpt < n_towr)
-//     {
-//         threadinit(tab[cpt], mutex);
-//         // err = pthread_create(tab[cpt], NULL, &th_init, &mutex);
-//         // if (err != 0)
-//         //     printf("Un thread n'a pas pu être créé.\n");
-//         cpt++;
-//         printf("\033[0;92mLe thread n°%d a été créé.\n-----------------\e[0m\n", cpt);
-//     }
-//     cpt = 0;
-//     while (cpt < n_towr)
-//     {
-//         pthread_join(*tab[cpt], NULL);
-//         printf("\e[0;34mWaiting for a thread to end.\e[0m\n");
-//         cpt++;
-//     }
-//     pthread_mutex_destroy(&mutex->mx);
-//     return (0);
-// }

@@ -9,7 +9,7 @@
 
 typedef struct      s_list
 {
-    pthread_mutex_t fork;
+    pthread_mutex_t fork_status;
 	struct s_list	*next;
 }			        t_list;
 
@@ -26,11 +26,12 @@ typedef struct      s_rules
 // /*      setup           */
 
 // t_rules init_rules(char **av);
-// void *thread_1(void *arg);
-// void    thread_init(pthread_t *thread, int nthread);
 
 /*      chained list utilities       */
-void    addback(t_list **cutlery);
+t_list    *addback(t_list **cutlery);
+t_list    *find_last(t_list *list);
+void    destroy_cutlery(t_list *cutlery);
+
 /*      utilities       */
 void    ft_print_nl(char *str);
 int     ft_strlen(char *str);
