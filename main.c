@@ -4,15 +4,10 @@ t_rules init_rules(char **av)
 {
     t_rules rules;
 
-    // rules = (t_rules)malloc(sizeof(t_rules));
-    // ft_print_nl("inside init_rules");
     rules.fork = NULL;
     rules.t_death = 0;
     rules.t_death = ft_atoi(av[2]);
-    // ft_print_nl("after t_death init");
-    // printf("t_death = %d\n", rules.t_death);
     rules.t_eat = ft_atoi(av[3]);
-    // ft_print_nl("after t_eat init");
     rules.t_sleep = ft_atoi(av[4]);
     if (av[5])
         rules.meals_cap = ft_atoi(av[5]);
@@ -40,7 +35,6 @@ void    *philosopher(void *arg)
         printf("un tour a été fait ! la diff est de: %ld\n", (now.tv_usec - last_meal.tv_usec));
     }
     printf("Le philosophe est mort. Long live the philosopher !\n");
-    // sleep(5);
 
     // while (((t_rules *)arg->last_meal - now) < (t_rules *)arg->t_death) 
     // {
@@ -49,8 +43,6 @@ void    *philosopher(void *arg)
     //      pthread_mutex_lock(&(*seating).fork_status);
     //      pthread_mutex_unlock(&(*seating).fork_status);
     // }
-    // gettimeofday(&now, NULL);
-    // printf("\e[0;91mOn est dans le thread et on veut la valeur de now: %ld\e[0m\n", now.tv_usec);
     pthread_exit(EXIT_SUCCESS);
 }
 
@@ -68,10 +60,7 @@ int main(int ac, char **av)
     err = 0;
     nphilo = ft_atoi(av[1]);
     table = malloc(sizeof(pthread_t *) * nphilo);
-    // ft_print_nl("avant init rules");
-    // rules = malloc(sizeof(t_rules));
     rules = init_rules(av);
-    // ft_print_nl("après init rules");
     while(i != nphilo)
     {
         table[i] = malloc(sizeof(pthread_t));
