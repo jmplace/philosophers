@@ -15,12 +15,14 @@ typedef struct      s_list
 
 typedef struct      s_rules
 {
+    t_list  *fork;
     int t_death;
     int t_eat;
     int t_sleep;
     int last_meal;
     int meals_cap;
 }                   t_rules;
+
 
 
 // /*      setup           */
