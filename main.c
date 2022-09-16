@@ -33,38 +33,42 @@ void    *philosopher(void *arg)
     t_list *fork;
     t_philo *data;
     struct timeval now;
-    // struct timeval last_meal;
+    struct timeval last_meal;
+    int meals;
 
     data = (t_philo *)arg;
     fork = data->fork;
-    pthread_mutex_lock(&(*fork).fork_status);
-    // dataprinter(data);
-    // while ((now.tv_usec - last_meal.tv_usec) < 500)
-    // {
-    //     if (pthread_mutex_lock(&(*fork).fork_status) == 0)
-    //     {
-    //         gettimeofday(&last_meal, NULL);
-    //         if (rules->meals_cap != 0)
-    //         {
-    //             meals++;
-    //             printf("Philosopher %d: meal %d/%d\n", rules->ph_id, meals, rules->meals_cap);
-    //             if (meals == rules->meals_cap)
-    //                 break;
-    //         }
-    //         printf("%ld: Philosopher %d is eating.\n", last_meal.tv_usec, rules->ph_id);
-    //         usleep(rules->t_eat);
-    //         pthread_mutex_unlock(&(*fork).fork_status);
-    //     }
-    //     gettimeofday(&now, NULL);
-    //     printf("%ld: Philosopher %d is sleeping.\n", now.tv_usec, rules->ph_id);
-    //     usleep(rules->t_sleep);
-    //     gettimeofday(&now, NULL);
-    //     printf("%ld: Philosopher %d is thinking.\n", now.tv_usec, rules->ph_id);
-    //     gettimeofday(&now, NULL);
-    // }
+    meals = 0;
     gettimeofday(&now, NULL);
-    printf("%ld: Philosopher %d is dead. Long live the philosopher !\n", now.tv_usec, data->ph_id);
-    pthread_mutex_unlock(&(*fork).fork_status);
+    last_meal = now;
+    // pthread_mutex_lock(&(*fork).fork_status);
+    // dataprinter(data);
+    while ((now.tv_usec - last_meal.tv_usec) < 500)
+    {
+        if (pthread_mutex_lock(&(*fork).fork_status) == 0)
+        {
+            gettimeofday(&last_meal, NULL);
+            if (data->rules->meals_cap != 0)
+            {
+                meals++;
+                printf("Philosopher %d: meal %d/%d\n", data->ph_id, meals, data->rules->meals_cap);
+                if (meals == data->rules->meals_cap)
+                    break;
+            }
+            printf("%ld: Philosopher %d is eating.\n", last_meal.tv_usec, data->ph_id);
+            usleep(data->rules->t_eat);
+            pthread_mutex_unlock(&(*fork).fork_status);
+        }
+        gettimeofday(&now, NULL);
+        // printf("%ld: Philosopher %d is sleeping.\n", now.tv_usec, data->ph_id);
+        usleep(data->rules->t_sleep);
+        gettimeofday(&now, NULL);
+        // printf("%ld: Philosopher %d is thinking.\n", now.tv_usec, data->ph_id);
+        gettimeofday(&now, NULL);
+    }
+    gettimeofday(&now, NULL);
+    printf("\e[1;91m%ld: Philosopher %d is dead. Long live the philosopher !\nhe made it to %d meals eaten out of %d.\n\e[22;91m\n", now.tv_usec, data->ph_id, meals, data->rules->meals_cap);
+    // pthread_mutex_unlock(&(*fork).fork_status);
     pthread_exit(EXIT_SUCCESS);
 }
 
