@@ -1,5 +1,24 @@
 #include "philosophers.h"
 
+void  listprinter(t_list *list)
+{
+    t_list *visiting;
+    int i;
+
+    i = 1;
+    printf("visiting node #%d : address %p\nvisiting next : %p\n", i, list, list->next);
+    i++;
+    visiting = list->next;
+    printf("Welcome to listprinter!\n");
+    while (visiting != list)
+    {
+        printf("visiting node #%d : address %p\nvisiting next : %p\n", i, visiting, visiting->next);
+        i++;
+        visiting = visiting->next;
+    }
+    return ;
+}
+
 t_list    *find_last(t_list *list)
 {
     t_list *last;

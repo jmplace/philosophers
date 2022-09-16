@@ -15,7 +15,6 @@ typedef struct      s_list
 
 typedef struct      s_rules
 {
-    t_list  *fork;
     int t_death;
     int t_eat;
     int t_sleep;
@@ -23,6 +22,12 @@ typedef struct      s_rules
     int meals_cap;
 }                   t_rules;
 
+typedef struct      s_philo
+{
+    t_list  *fork;
+    int     ph_id;
+    t_rules *rules;
+}                   t_philo;
 
 
 // /*      setup           */
@@ -35,6 +40,8 @@ t_list    *find_last(t_list *list);
 void    destroy_cutlery(t_list *cutlery);
 
 /*      utilities       */
+void  listprinter(t_list *list);
+void    dataprinter(t_philo *data);
 void    ft_print_nl(char *str);
 int     ft_strlen(char *str);
 int ft_atoi(char *str);

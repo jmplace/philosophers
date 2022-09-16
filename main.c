@@ -1,10 +1,22 @@
 #include "philosophers.h"
 
+void    dataprinter(t_philo *data)
+{
+    printf("for i = %d, fork : %p\n", data->ph_id, (data->fork));
+    printf("for i = %d, next fork : %p\n", data->ph_id, (data->fork->next));
+    printf("ph_id : %p : %d\n", &(data->ph_id), data->ph_id);
+    printf("t_death : %p : %d\n", &(data->rules->t_death), data->rules->t_death);
+    printf("t_eat : %p : %d\n", &(data->rules->t_eat), data->rules->t_eat);
+    printf("t_sleep : %p : %d\n", &(data->rules->t_sleep), data->rules->t_sleep);
+    printf("meals_cap : %p : %d\n", &(data->rules->meals_cap), data->rules->meals_cap);
+
+    return ;
+}
+
 t_rules init_rules(char **av)
 {
     t_rules rules;
 
-    rules.fork = NULL;
     rules.t_death = 0;
     rules.t_death = ft_atoi(av[2]);
     rules.t_eat = ft_atoi(av[3]);
@@ -19,30 +31,40 @@ t_rules init_rules(char **av)
 void    *philosopher(void *arg)
 {
     t_list *fork;
-    t_rules *rules;
+    t_philo *data;
     struct timeval now;
-    struct timeval last_meal;
+    // struct timeval last_meal;
 
-    rules = (t_rules *)arg;
-    // rules->last_meal = gettimeofday(tv_usec, NULL);
-    gettimeofday(&now, NULL);
-    gettimeofday(&last_meal, NULL);
-    printf("\e[0;91mOn est dans le thread et on veut la valeur de now: %ld\e[0m\n", now.tv_usec);
-    while ((now.tv_usec - last_meal.tv_usec) < 100)
-    {
-        gettimeofday(&now, NULL);
-        printf("now: %ld\n", now.tv_usec);
-        printf("un tour a été fait ! la diff est de: %ld\n", (now.tv_usec - last_meal.tv_usec));
-    }
-    printf("Le philosophe est mort. Long live the philosopher !\n");
-
-    // while (((t_rules *)arg->last_meal - now) < (t_rules *)arg->t_death) 
+    data = (t_philo *)arg;
+    fork = data->fork;
+    pthread_mutex_lock(&(*fork).fork_status);
+    // dataprinter(data);
+    // while ((now.tv_usec - last_meal.tv_usec) < 500)
     // {
-    //      now = gettimeofday(tv_usec, NULL);
-    //      fork = (t_rules *)arg->fork;
-    //      pthread_mutex_lock(&(*seating).fork_status);
-    //      pthread_mutex_unlock(&(*seating).fork_status);
+    //     if (pthread_mutex_lock(&(*fork).fork_status) == 0)
+    //     {
+    //         gettimeofday(&last_meal, NULL);
+    //         if (rules->meals_cap != 0)
+    //         {
+    //             meals++;
+    //             printf("Philosopher %d: meal %d/%d\n", rules->ph_id, meals, rules->meals_cap);
+    //             if (meals == rules->meals_cap)
+    //                 break;
+    //         }
+    //         printf("%ld: Philosopher %d is eating.\n", last_meal.tv_usec, rules->ph_id);
+    //         usleep(rules->t_eat);
+    //         pthread_mutex_unlock(&(*fork).fork_status);
+    //     }
+    //     gettimeofday(&now, NULL);
+    //     printf("%ld: Philosopher %d is sleeping.\n", now.tv_usec, rules->ph_id);
+    //     usleep(rules->t_sleep);
+    //     gettimeofday(&now, NULL);
+    //     printf("%ld: Philosopher %d is thinking.\n", now.tv_usec, rules->ph_id);
+    //     gettimeofday(&now, NULL);
     // }
+    gettimeofday(&now, NULL);
+    printf("%ld: Philosopher %d is dead. Long live the philosopher !\n", now.tv_usec, data->ph_id);
+    pthread_mutex_unlock(&(*fork).fork_status);
     pthread_exit(EXIT_SUCCESS);
 }
 
@@ -51,31 +73,45 @@ int main(int ac, char **av)
     int nphilo;
     pthread_t **table;
     t_list *cutlery = NULL;
-    t_rules rules;
-    t_list *fork;
+    t_rules *rules = NULL;
+    t_philo *philo = NULL;
     int i;
     int err;
 
     i = 0;
+    if (ac == 0)
+        return (0);
     err = 0;
     nphilo = ft_atoi(av[1]);
     table = malloc(sizeof(pthread_t *) * nphilo);
-    rules = init_rules(av);
+    philo = malloc(sizeof(t_philo) * nphilo);
+    rules = malloc(sizeof(t_rules));
+    *rules = init_rules(av);
     while(i != nphilo)
     {
         table[i] = malloc(sizeof(pthread_t));
-        rules.fork = addback(&cutlery);
-        printf("%p\n", fork);
-        err = pthread_create(table[i], NULL, &philosopher, &rules);
-        printf("err = %d\n", err);
+        (philo + i)->fork = addback(&cutlery);
+        (philo + i)->ph_id = i + 1;
+        (philo + i)->rules = rules;
+        pthread_create(table[i], NULL, philosopher, (philo + i));
         i++;
     }
     i = 0;
+    // listprinter(cutlery);
     while(i != nphilo)
     {
-        pthread_join(*table[i], NULL);
+        err = pthread_join(*table[i], NULL);
+        if (err == 0)
+            printf("thread %d est mort.\n", (i + 1));
+        else
+            printf("le thread %d n'a pas voulu mourir correctement. :'(", (i + 1));
         i++;
     }
     destroy_cutlery(cutlery);
     return (0);
 }
+
+
+/*
+    avant de usleep, verifier si le philo meurt pendant ce laps de temps !
+*/
