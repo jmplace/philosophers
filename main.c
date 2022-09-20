@@ -111,7 +111,9 @@ int main(int ac, char **av)
             printf("le thread %d n'a pas voulu mourir correctement. :'(", (i + 1));
         i++;
     }
+    // free(table);
     destroy_cutlery(cutlery);
+    dishcleaner(cutlery);
     return (0);
 }
 

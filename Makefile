@@ -12,6 +12,7 @@ END_COLOR	:= \033[0;39m
 
 SRCS	=	ft_atoi.c \
 			ft_print_nl.c \
+			clean_utils.c \
 			list_utils.c \
 			main.c
 OBJ		=	${SRCS:.c=.o}
@@ -28,7 +29,7 @@ CFLAGS	=	-Wall -Wextra -Werror -O0
 	@echo "$(BLUE)Compiling $<...$(END_COLOR)"
 
 $(NAME):	${OBJ} Makefile
-	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME) ${HEADER} -lpthread
+	@$(CC) -fsanitize=thread -g $(CFLAGS) $(OBJ) -o $(NAME) ${HEADER} -lpthread
 	@echo "$(GREEN)Compiled $(NAME) :)$(END_COLOR)"
 
 all:	${NAME}

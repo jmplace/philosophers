@@ -6,10 +6,10 @@ void  listprinter(t_list *list)
     int i;
 
     i = 1;
+    printf("Welcome to listprinter!\n");
     printf("visiting node #%d : address %p\nvisiting next : %p\n", i, list, list->next);
     i++;
     visiting = list->next;
-    printf("Welcome to listprinter!\n");
     while (visiting != list)
     {
         printf("visiting node #%d : address %p\nvisiting next : %p\n", i, visiting, visiting->next);

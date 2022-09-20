@@ -34,12 +34,16 @@ typedef struct      s_philo
 
 // t_rules init_rules(char **av);
 
-/*      chained list utilities       */
+/*      chained list utilities      */
 t_list    *addback(t_list **cutlery);
 t_list    *find_last(t_list *list);
 void    destroy_cutlery(t_list *cutlery);
 
-/*      utilities       */
+/*      cleaning utilities          */
+void    dishcleaner(t_list *cutlery);
+void    tablecleaner(pthread_t **table, int i);
+
+/*      utilities                   */
 void  listprinter(t_list *list);
 void    dataprinter(t_philo *data);
 void    ft_print_nl(char *str);
