@@ -19,6 +19,7 @@ t_rules init_rules(char **av)
 
     rules.someone_died = 0;
     pthread_mutex_init(&(rules.someone_died_m), NULL);
+    rules.last_meal = 0;
     rules.t_death = ft_atoi(av[2]);
     rules.t_eat = ft_atoi(av[3]);
     rules.t_sleep = ft_atoi(av[4]);

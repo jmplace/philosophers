@@ -18,7 +18,7 @@ typedef struct      s_rules
     int t_death;
     int t_eat;
     int t_sleep;
-    int last_meal;
+    long int last_meal;
     int meals_cap;
     pthread_mutex_t someone_died_m;
     int someone_died;
@@ -33,7 +33,7 @@ typedef struct      s_philo
 
 
 // /*      setup           */
-
+void    cutlery_init(t_philo *philo, t_list **cutlery, int nphilo);
 t_rules init_rules(char **av);
 
 /*      routine utilities           */
@@ -55,7 +55,7 @@ void    dataprinter(t_philo *data);
 void    listprinter(t_list *list);
 void    ft_print_nl(char *str);
 
-/*      utilities                   */
+/*      utilities                    */
 int     ft_strlen(char *str);
 int ft_atoi(char *str);
 int ft_is_numeric(char b);

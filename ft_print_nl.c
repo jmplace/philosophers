@@ -13,9 +13,11 @@ int     ft_strlen(char *str)
 void    ft_print_nl(char *str)
 {
     int cnt;
+    // int voidd;
 
     cnt = ft_strlen(str) + 1;
     write(1, str, cnt);
     write(1, "\n", 1);
+    // (void)voidd;
     return ;
 }

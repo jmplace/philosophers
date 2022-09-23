@@ -11,8 +11,21 @@ long int    whattimeisit(void)
         printf("Couldn't get time of day.\n");
         return (-1);
     }
-    ms = timestruct.tv_sec * 1000 + timestruct.tv_usec / 1000;
+    ms = (timestruct.tv_sec * 1000) + (timestruct.tv_usec / 1000);
     return (ms); 
+}
+
+void    cutlery_init(t_philo *philo, t_list **cutlery, int nphilo)
+{
+    int i;
+
+    i = 0;
+    while (i != nphilo)
+    {
+        (philo + i)->fork = addback(&(*cutlery));
+        i++;
+    }
+    return ;
 }
 
 void    *philosopher(void *arg)
@@ -23,18 +36,25 @@ void    *philosopher(void *arg)
     meals = 0;
     data = (t_philo *)arg;
     (void)data;
-    // if (data->ph_id % 2 != 0)
-        // usleep(data->rules->t_eat);
+    printf("%ld: philo %d is awake.\n", whattimeisit(), data->ph_id);
+    if (data->ph_id % 2 == 0)
+        usleep(data->rules->t_eat);
     pthread_mutex_lock(&data->rules->someone_died_m);
     while (data->rules->someone_died == 0)
     {
         pthread_mutex_unlock(&data->rules->someone_died_m);
         pick_fork(data);
         meals++;
-        printf("%ld: philo %d is eating.\n", whattimeisit(), data->ph_id);
+        printf("%ld: philo %d is eating. (meal %d/%d)\n", whattimeisit(), data->ph_id, meals, data->rules->meals_cap);
+        data->rules->last_meal = whattimeisit();
         usleep(data->rules->t_eat);
         leave_fork(data);
         pthread_mutex_lock(&data->rules->someone_died_m);
+        if ((whattimeisit() - data->rules->last_meal) > data->rules->t_death)
+        {
+            printf("Quelqu'un (%d) est mort de faim ! (pas mangé depuis %ldmsec)\n", data->ph_id, (whattimeisit() - data->rules->last_meal));
+            data->rules->someone_died = 1;
+        }
         if (meals == data->rules->meals_cap)
             data->rules->someone_died = 1;
     }
@@ -47,12 +67,14 @@ int main(int ac, char **av)
 {
     int nphilo;
     pthread_t **table;
+    // pthread_mutex_t mutex;
     t_list *cutlery = NULL;
     t_rules *rules = NULL;
     t_philo *philo = NULL;
     int i;
     int err;
 
+    // pthread_mutex_init(&mutex, NULL);
     i = 0;
     if (ac == 0)
         return (0);
@@ -62,10 +84,10 @@ int main(int ac, char **av)
     philo = malloc(sizeof(t_philo) * nphilo);
     rules = malloc(sizeof(t_rules));
     *rules = init_rules(av);
+    cutlery_init(philo, &cutlery, nphilo);
     while(i != nphilo)
     {
         table[i] = malloc(sizeof(pthread_t));
-        (philo + i)->fork = addback(&cutlery);
         (philo + i)->ph_id = i + 1;
         (philo + i)->rules = rules;
         pthread_create(table[i], NULL, philosopher, (philo + i));
