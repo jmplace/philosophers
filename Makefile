@@ -14,6 +14,8 @@ SRCS	=	ft_atoi.c \
 			ft_print_nl.c \
 			clean_utils.c \
 			list_utils.c \
+			struct_utils.c \
+			routine_utils.c \
 			main.c
 OBJ		=	${SRCS:.c=.o}
 HEADER	=   philosophers.h

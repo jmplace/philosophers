@@ -20,6 +20,8 @@ typedef struct      s_rules
     int t_sleep;
     int last_meal;
     int meals_cap;
+    pthread_mutex_t someone_died_m;
+    int someone_died;
 }                   t_rules;
 
 typedef struct      s_philo
@@ -32,7 +34,12 @@ typedef struct      s_philo
 
 // /*      setup           */
 
-// t_rules init_rules(char **av);
+t_rules init_rules(char **av);
+
+/*      routine utilities           */
+long int    whattimeisit(void);
+void    pick_fork(t_philo *data);
+void    leave_fork(t_philo *data);
 
 /*      chained list utilities      */
 t_list    *addback(t_list **cutlery);
@@ -43,10 +50,12 @@ void    destroy_cutlery(t_list *cutlery);
 void    dishcleaner(t_list *cutlery);
 void    tablecleaner(pthread_t **table, int i);
 
-/*      utilities                   */
-void  listprinter(t_list *list);
+/*      printer utilities           */
 void    dataprinter(t_philo *data);
+void    listprinter(t_list *list);
 void    ft_print_nl(char *str);
+
+/*      utilities                   */
 int     ft_strlen(char *str);
 int ft_atoi(char *str);
 int ft_is_numeric(char b);

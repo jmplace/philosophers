@@ -1,74 +1,45 @@
 #include "philosophers.h"
 
-void    dataprinter(t_philo *data)
+
+long int    whattimeisit(void)
 {
-    printf("for i = %d, fork : %p\n", data->ph_id, (data->fork));
-    printf("for i = %d, next fork : %p\n", data->ph_id, (data->fork->next));
-    printf("ph_id : %p : %d\n", &(data->ph_id), data->ph_id);
-    printf("t_death : %p : %d\n", &(data->rules->t_death), data->rules->t_death);
-    printf("t_eat : %p : %d\n", &(data->rules->t_eat), data->rules->t_eat);
-    printf("t_sleep : %p : %d\n", &(data->rules->t_sleep), data->rules->t_sleep);
-    printf("meals_cap : %p : %d\n", &(data->rules->meals_cap), data->rules->meals_cap);
+    long int    ms;
+    struct timeval  timestruct;
 
-    return ;
-}
-
-t_rules init_rules(char **av)
-{
-    t_rules rules;
-
-    rules.t_death = 0;
-    rules.t_death = ft_atoi(av[2]);
-    rules.t_eat = ft_atoi(av[3]);
-    rules.t_sleep = ft_atoi(av[4]);
-    if (av[5])
-        rules.meals_cap = ft_atoi(av[5]);
-    else
-        rules.meals_cap = 0;
-    return (rules);
+    if (gettimeofday(&timestruct, NULL) == -1)
+    {
+        printf("Couldn't get time of day.\n");
+        return (-1);
+    }
+    ms = timestruct.tv_sec * 1000 + timestruct.tv_usec / 1000;
+    return (ms); 
 }
 
 void    *philosopher(void *arg)
 {
-    t_list *fork;
     t_philo *data;
-    struct timeval now;
-    struct timeval last_meal;
     int meals;
 
-    data = (t_philo *)arg;
-    fork = data->fork;
     meals = 0;
-    gettimeofday(&now, NULL);
-    last_meal = now;
-    // pthread_mutex_lock(&(*fork).fork_status);
-    // dataprinter(data);
-    while ((now.tv_usec - last_meal.tv_usec) < 500)
+    data = (t_philo *)arg;
+    (void)data;
+    // if (data->ph_id % 2 != 0)
+        // usleep(data->rules->t_eat);
+    pthread_mutex_lock(&data->rules->someone_died_m);
+    while (data->rules->someone_died == 0)
     {
-        if (pthread_mutex_lock(&(*fork).fork_status) == 0)
-        {
-            gettimeofday(&last_meal, NULL);
-            if (data->rules->meals_cap != 0)
-            {
-                meals++;
-                printf("Philosopher %d: meal %d/%d\n", data->ph_id, meals, data->rules->meals_cap);
-                if (meals == data->rules->meals_cap)
-                    break;
-            }
-            printf("%ld: Philosopher %d is eating.\n", last_meal.tv_usec, data->ph_id);
-            usleep(data->rules->t_eat);
-            pthread_mutex_unlock(&(*fork).fork_status);
-        }
-        gettimeofday(&now, NULL);
-        // printf("%ld: Philosopher %d is sleeping.\n", now.tv_usec, data->ph_id);
-        usleep(data->rules->t_sleep);
-        gettimeofday(&now, NULL);
-        // printf("%ld: Philosopher %d is thinking.\n", now.tv_usec, data->ph_id);
-        gettimeofday(&now, NULL);
+        pthread_mutex_unlock(&data->rules->someone_died_m);
+        pick_fork(data);
+        meals++;
+        printf("%ld: philo %d is eating.\n", whattimeisit(), data->ph_id);
+        usleep(data->rules->t_eat);
+        leave_fork(data);
+        pthread_mutex_lock(&data->rules->someone_died_m);
+        if (meals == data->rules->meals_cap)
+            data->rules->someone_died = 1;
     }
-    gettimeofday(&now, NULL);
-    printf("\e[1;91m%ld: Philosopher %d is dead. Long live the philosopher !\nhe made it to %d meals eaten out of %d.\n\e[22;91m\n", now.tv_usec, data->ph_id, meals, data->rules->meals_cap);
-    // pthread_mutex_unlock(&(*fork).fork_status);
+    pthread_mutex_unlock(&data->rules->someone_died_m);
+    // printf("philosopher n%d said: ''it is currently %ld !''\n", data->ph_id, whattimeisit());
     pthread_exit(EXIT_SUCCESS);
 }
 
@@ -113,11 +84,19 @@ int main(int ac, char **av)
     }
     // free(table);
     destroy_cutlery(cutlery);
-    dishcleaner(cutlery);
+    // dishcleaner(cutlery);
     return (0);
 }
 
 
 /*
+    1. fonction pick up fork (/w message)
+    2. fonction put down fork (/w message)
+    3. sleeping
+    3.5 fonction micro sleep 
+    4. thinking
+    5. fonction check someone_died
+
+    vérifier la next fourchette aussi
     avant de usleep, verifier si le philo meurt pendant ce laps de temps !
 */
