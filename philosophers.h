@@ -18,28 +18,32 @@ typedef struct      s_rules
     int t_death;
     int t_eat;
     int t_sleep;
-    long int last_meal;
     int meals_cap;
-    pthread_mutex_t someone_died_m;
-    int someone_died;
+    // pthread_mutex_t start_m;
+    // int start;
+    pthread_mutex_t end_m;
+    int end;
 }                   t_rules;
 
-typedef struct      s_philo
+typedef struct      s_ph
 {
     t_list  *fork;
+    long int last_meal;
     int     ph_id;
     t_rules *rules;
-}                   t_philo;
+}                   t_ph;
 
 
 // /*      setup           */
-void    cutlery_init(t_philo *philo, t_list **cutlery, int nphilo);
+void    cutlery_init(t_ph *ph, t_list **cutlery, int nph);
 t_rules init_rules(char **av);
 
 /*      routine utilities           */
 long int    whattimeisit(void);
-void    pick_fork(t_philo *data);
-void    leave_fork(t_philo *data);
+void    sleep_time(t_ph *data, long int time, int flag);
+void    pick_fork(t_ph *data);
+void    leave_fork(t_ph *data);
+void    waiting(long int time);
 
 /*      chained list utilities      */
 t_list    *addback(t_list **cutlery);
@@ -51,7 +55,7 @@ void    dishcleaner(t_list *cutlery);
 void    tablecleaner(pthread_t **table, int i);
 
 /*      printer utilities           */
-void    dataprinter(t_philo *data);
+void    dataprinter(t_ph *data);
 void    listprinter(t_list *list);
 void    ft_print_nl(char *str);
 

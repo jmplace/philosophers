@@ -15,14 +15,14 @@ long int    whattimeisit(void)
     return (ms); 
 }
 
-void    cutlery_init(t_philo *philo, t_list **cutlery, int nphilo)
+void    cutlery_init(t_ph *ph, t_list **cutlery, int nph)
 {
     int i;
 
     i = 0;
-    while (i != nphilo)
+    while (i != nph)
     {
-        (philo + i)->fork = addback(&(*cutlery));
+        (ph + i)->fork = addback(&(*cutlery));
         i++;
     }
     return ;
@@ -30,72 +30,99 @@ void    cutlery_init(t_philo *philo, t_list **cutlery, int nphilo)
 
 void    *philosopher(void *arg)
 {
-    t_philo *data;
+    t_ph *data;
     int meals;
 
     meals = 0;
-    data = (t_philo *)arg;
+    data = (t_ph *)arg;
     (void)data;
-    printf("%ld: philo %d is awake.\n", whattimeisit(), data->ph_id);
-    if (data->ph_id % 2 == 0)
-        usleep(data->rules->t_eat);
-    pthread_mutex_lock(&data->rules->someone_died_m);
-    while (data->rules->someone_died == 0)
+    data->last_meal = whattimeisit();
+    printf("%ld: ph %d is awake.\n", whattimeisit(), data->ph_id);
+    if (data->ph_id % 2 != 0)
+        usleep(data->rules->t_sleep);
+    pthread_mutex_lock(&data->rules->end_m);
+    while (data->rules->end == 0)
     {
-        pthread_mutex_unlock(&data->rules->someone_died_m);
-        pick_fork(data);
-        meals++;
-        printf("%ld: philo %d is eating. (meal %d/%d)\n", whattimeisit(), data->ph_id, meals, data->rules->meals_cap);
-        data->rules->last_meal = whattimeisit();
-        usleep(data->rules->t_eat);
-        leave_fork(data);
-        pthread_mutex_lock(&data->rules->someone_died_m);
-        if ((whattimeisit() - data->rules->last_meal) > data->rules->t_death)
+        pthread_mutex_unlock(&data->rules->end_m);
+
+        // printf("%ld: %d is stuck here.\n", whattimeisit(), data->ph_id);
+        /*     MANGER -- DEBUT                  */
+        if (data->rules->end != 0)
         {
-            printf("Quelqu'un (%d) est mort de faim ! (pas mangé depuis %ldmsec)\n", data->ph_id, (whattimeisit() - data->rules->last_meal));
-            data->rules->someone_died = 1;
+            printf("(%d): Someone died: stopping the simulation.\n", data->ph_id);
+            leave_fork(data);
+            pthread_exit(EXIT_SUCCESS);
+        }
+        pick_fork(data);
+        if (data->rules->end != 0)
+        {
+            printf("(%d): Someone died: stopping the simulation.\n", data->ph_id);
+            leave_fork(data);
+            pthread_exit(EXIT_SUCCESS);
+        }
+        meals++;
+        printf("%ld %d is eating.\n", whattimeisit(), data->ph_id);
+        data->last_meal = whattimeisit();
+        sleep_time(data, data->rules->t_eat, 3);
+        leave_fork(data);
+        /*     MANGER -- FIN                    */
+        
+        /*     SLEEP -- DEBUT                   */
+        sleep_time(data, data->rules->t_sleep, 1);
+        /*     SLEEP -- FIN                     */
+
+        /*     THINK -- DEBUT                   */
+        sleep_time(data, 0, 2);
+        /*     THINK -- FIN                     */
+
+        pthread_mutex_lock(&data->rules->end_m);
+        printf("%d hasn't been eating for %ld msec.\n", data->ph_id, (whattimeisit() - data->last_meal));
+        if ((whattimeisit() - data->last_meal) > data->rules->t_death)
+        {
+            printf("(%d): Je suis mort de faim ! (pas mangé depuis %ldmsec)\n", data->ph_id, (whattimeisit() - data->last_meal));
+            data->rules->end = 1;
         }
         if (meals == data->rules->meals_cap)
-            data->rules->someone_died = 1;
+        {
+            printf("(%d): J'ai plus faim ! (%d repas)\n", data->ph_id, meals);
+            data->rules->end = 2;
+        }
     }
-    pthread_mutex_unlock(&data->rules->someone_died_m);
+    pthread_mutex_unlock(&data->rules->end_m);
     // printf("philosopher n%d said: ''it is currently %ld !''\n", data->ph_id, whattimeisit());
     pthread_exit(EXIT_SUCCESS);
 }
 
 int main(int ac, char **av)
 {
-    int nphilo;
+    int nph;
     pthread_t **table;
-    // pthread_mutex_t mutex;
     t_list *cutlery = NULL;
     t_rules *rules = NULL;
-    t_philo *philo = NULL;
+    t_ph *ph = NULL;
     int i;
     int err;
 
-    // pthread_mutex_init(&mutex, NULL);
     i = 0;
     if (ac == 0)
         return (0);
     err = 0;
-    nphilo = ft_atoi(av[1]);
-    table = malloc(sizeof(pthread_t *) * nphilo);
-    philo = malloc(sizeof(t_philo) * nphilo);
+    nph = ft_atoi(av[1]);
+    table = malloc(sizeof(pthread_t *) * nph);
+    ph = malloc(sizeof(t_ph) * nph);
     rules = malloc(sizeof(t_rules));
     *rules = init_rules(av);
-    cutlery_init(philo, &cutlery, nphilo);
-    while(i != nphilo)
+    cutlery_init(ph, &cutlery, nph);
+    while(i != nph)
     {
         table[i] = malloc(sizeof(pthread_t));
-        (philo + i)->ph_id = i + 1;
-        (philo + i)->rules = rules;
-        pthread_create(table[i], NULL, philosopher, (philo + i));
+        (ph + i)->ph_id = i + 1;
+        (ph + i)->rules = rules;
+        pthread_create(table[i], NULL, philosopher, (ph + i));
         i++;
     }
     i = 0;
-    // listprinter(cutlery);
-    while(i != nphilo)
+    while(i != nph)
     {
         err = pthread_join(*table[i], NULL);
         if (err == 0)
@@ -120,5 +147,5 @@ int main(int ac, char **av)
     5. fonction check someone_died
 
     vérifier la next fourchette aussi
-    avant de usleep, verifier si le philo meurt pendant ce laps de temps !
+    avant de usleep, verifier si le ph meurt pendant ce laps de temps !
 */

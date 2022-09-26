@@ -1,6 +1,6 @@
 #include "philosophers.h"
 
-void    dataprinter(t_philo *data)
+void    dataprinter(t_ph *data)
 {
     printf("for i = %d, fork : %p\n", data->ph_id, (data->fork));
     printf("for i = %d, next fork : %p\n", data->ph_id, (data->fork->next));
@@ -17,9 +17,10 @@ t_rules init_rules(char **av)
 {
     t_rules rules;
 
-    rules.someone_died = 0;
-    pthread_mutex_init(&(rules.someone_died_m), NULL);
-    rules.last_meal = 0;
+    rules.end = 0;
+    // rules.start = 0;
+    // pthread_mutex_init(&rules.start_m, NULL);
+    pthread_mutex_init(&(rules.end_m), NULL);
     rules.t_death = ft_atoi(av[2]);
     rules.t_eat = ft_atoi(av[3]);
     rules.t_sleep = ft_atoi(av[4]);
