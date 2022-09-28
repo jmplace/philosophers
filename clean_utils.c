@@ -24,10 +24,10 @@ void    dishcleaner(t_list *cutlery)
 	{
 		tofree = tmp;
 		tmp = tmp->next;
-        free(&(tofree->fork_status));
+        free(&(tofree->fork_m));
 		free(tofree);
 	}
-    free(&(tmp->fork_status));
+    free(&(tmp->fork_m));
 	free(tmp);
     // listprinter(cutlery);
     return ;

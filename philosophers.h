@@ -7,20 +7,22 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
+#define RED "\x1B[31m"
+#define WHT "\x1B[0m"
+
 typedef struct      s_list
 {
-    pthread_mutex_t fork_status;
+    pthread_mutex_t fork_m;
 	struct s_list	*next;
 }			        t_list;
 
 typedef struct      s_rules
 {
-    int t_death;
-    int t_eat;
-    int t_sleep;
+    long int t_death;
+    long int t_eat;
+    long int t_sleep;
     int meals_cap;
-    // pthread_mutex_t start_m;
-    // int start;
+    long int start;
     pthread_mutex_t end_m;
     int end;
 }                   t_rules;
@@ -38,26 +40,30 @@ typedef struct      s_ph
 void    cutlery_init(t_ph *ph, t_list **cutlery, int nph);
 t_rules init_rules(char **av);
 
-/*      routine utilities           */
+/*      time utilities             */
+long int    time_monitor(t_ph *ph);
 long int    whattimeisit(void);
-void    sleep_time(t_ph *data, long int time, int flag);
-void    pick_fork(t_ph *data);
-void    leave_fork(t_ph *data);
-void    waiting(long int time);
+void        waiting(long int time, t_ph *ph);
 
-/*      chained list utilities      */
+/*      routine utilities          */
+void    sleep_time(t_ph *ph, long int time, int flag);
+void    lock_f(t_ph *ph);
+void    unlock_f(t_ph *ph);
+void    ending_c(t_ph *ph);
+void    ending_c_f(t_ph *ph);
+
+/*      linked list utilities      */
 t_list    *addback(t_list **cutlery);
 t_list    *find_last(t_list *list);
-void    destroy_cutlery(t_list *cutlery);
+void      destroy_list(t_list *cutlery);
 
 /*      cleaning utilities          */
 void    dishcleaner(t_list *cutlery);
 void    tablecleaner(pthread_t **table, int i);
 
 /*      printer utilities           */
-void    dataprinter(t_ph *data);
+void    phprinter(t_ph *ph);
 void    listprinter(t_list *list);
-void    ft_print_nl(char *str);
 
 /*      utilities                    */
 int     ft_strlen(char *str);

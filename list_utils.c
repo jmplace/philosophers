@@ -35,7 +35,7 @@ t_list    *addback(t_list **cutlery)
     t_list *last;
 
     node = (t_list *)malloc(sizeof(t_list));
-    pthread_mutex_init(&(node->fork_status), NULL);
+    pthread_mutex_init(&(node->fork_m), NULL);
     if (!(*cutlery))
     {
         node->next = node;
@@ -48,7 +48,7 @@ t_list    *addback(t_list **cutlery)
     return (node);
 }
 
-void    destroy_cutlery(t_list *cutlery)
+void    destroy_list(t_list *cutlery)
 {
     t_list *last;
     t_list *tmp;
@@ -56,12 +56,12 @@ void    destroy_cutlery(t_list *cutlery)
     last = find_last(cutlery);
     while (cutlery != last)
     {
-        pthread_mutex_destroy(&(cutlery->fork_status));
+        pthread_mutex_destroy(&(cutlery->fork_m));
         tmp = cutlery;
         cutlery = cutlery->next;
         free(tmp);
     }
-    pthread_mutex_destroy(&(cutlery->fork_status));
+    pthread_mutex_destroy(&(cutlery->fork_m));
     free(cutlery);
     return ;
 }

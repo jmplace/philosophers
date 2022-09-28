@@ -1,110 +1,129 @@
 #include "philosophers.h"
 
-void    pick_fork(t_ph *data)
+void    ending_c(t_ph *ph)
 {
-    if (data->ph_id % 2 != 0)
+        if ((time_monitor(ph) - ph->last_meal) > ph->rules->t_death)
+        {
+            pthread_mutex_lock(&ph->rules->end_m);
+            ph->rules->end = 1;
+            pthread_mutex_unlock(&ph->rules->end_m);
+        }
+        pthread_mutex_lock(&ph->rules->end_m);
+        if (ph->rules->end != 0)
+        {
+            pthread_mutex_unlock(&ph->rules->end_m);
+            pthread_exit(EXIT_SUCCESS);
+        }
+        pthread_mutex_unlock(&ph->rules->end_m);
+}
+
+void    ending_c_f(t_ph *ph)
+{
+        pthread_mutex_lock(&ph->rules->end_m);
+        if ((time_monitor(ph) - ph->last_meal) > ph->rules->t_death)
+            ph->rules->end = 1;
+        if (ph->rules->end != 0 || ((time_monitor(ph) - ph->last_meal) > ph->rules->t_death))
+        {
+            unlock_f(ph);
+            pthread_mutex_unlock(&ph->rules->end_m);
+            pthread_exit(EXIT_SUCCESS);
+        }
+        pthread_mutex_unlock(&ph->rules->end_m);
+}
+
+void    lock_f(t_ph *ph)
+{
+    if (ph->ph_id % 2 != 0)
     {
-        printf("%d is trying to pick up left fork.\n", data->ph_id);
-        if (pthread_mutex_lock(&data->fork->fork_status) == 0)
-            printf("philo %d picked up the left fork. (fork #%p)\n", data->ph_id, &data->fork->fork_status);
-        else
-            printf("warning: %d couldn't pick up the left fork.\n", data->ph_id);
-        printf("%d is trying to pick up right fork.\n", data->ph_id);
-        if (pthread_mutex_lock(&data->fork->next->fork_status) == 0)
-            printf("philo %d picked up the right fork. (fork #%p)\n", data->ph_id, &data->fork->next->fork_status);
-        else
-            printf("warning: %d couldn't pick up right fork!\n", data->ph_id);
+        if (pthread_mutex_lock(&ph->fork->fork_m) == 0)
+            (void)ph;
+        if (pthread_mutex_lock(&ph->fork->next->fork_m) == 0)
+            (void)ph;
     }
     else
     {
-        printf("%d is trying to pick up right fork.\n", data->ph_id);
-        if (pthread_mutex_lock(&data->fork->next->fork_status) == 0)
+        if (pthread_mutex_lock(&ph->fork->next->fork_m) == 0)
         {
-            printf("philo %d picked up the right fork. (fork #%p)\n", data->ph_id, &data->fork->fork_status);
-            printf("%d is trying to pick up left fork.\n", data->ph_id);
-            if (pthread_mutex_lock(&data->fork->fork_status) == 0)
-                printf("philo %d picked up the left fork. (fork #%p)\n", data->ph_id, &data->fork->next->fork_status);
+            if (pthread_mutex_lock(&ph->fork->fork_m) == 0)
+                (void)ph;
         }
-        else
-            printf("warning: %d couldn't pick up the right fork.\n", data->ph_id);
     }
     return ;
 }
 
-void    leave_fork(t_ph *data)
+void    unlock_f(t_ph *ph)
 {
-    if (data->ph_id % 2 != 0)
+    if (ph->ph_id % 2 != 0)
     {
-        if (pthread_mutex_unlock(&data->fork->fork_status) == 0)
-            printf("philo %d put down up the left fork. (fork #%p)\n", data->ph_id, &data->fork->fork_status);
-        if (pthread_mutex_unlock(&data->fork->next->fork_status) == 0)
-            printf("philo %d put down up the right fork. (fork #%p)\n", data->ph_id, &data->fork->next->fork_status);
+        if (pthread_mutex_unlock(&ph->fork->fork_m) == 0)
+            (void)ph;
+        if (pthread_mutex_unlock(&ph->fork->next->fork_m) == 0)
+            (void)ph;
     }
     else
     {
-        if (pthread_mutex_unlock(&data->fork->next->fork_status) == 0)
+        if (pthread_mutex_unlock(&ph->fork->next->fork_m) == 0)
         {
-            printf("philo %d put down up the left fork. (fork #%p)\n", data->ph_id, &data->fork->fork_status);
-            if (pthread_mutex_unlock(&data->fork->fork_status) == 0)
-                printf("philo %d put down up the right fork. (fork #%p)\n", data->ph_id, &data->fork->next->fork_status);
+            if (pthread_mutex_unlock(&ph->fork->fork_m) == 0)
+                (void)ph;
         }
     }
     return ;
 }
 
-void    waiting(long int time)
+void    waiting(long int time, t_ph *ph)
 {
     long int dest;
 
     dest = whattimeisit() + time;
     while (whattimeisit() < dest)
     {
+        ending_c(ph);
         usleep(100);
     }
     return ;
 }
 
-void    sleep_time(t_ph *data, long int time, int flag)
+void    sleep_time(t_ph *ph, long int time, int flag)
 {
     long int    diff;
 
-    diff = whattimeisit() - data->last_meal;
-    pthread_mutex_lock(&data->rules->end_m);
-    if (data->rules->end == 0 && flag == 2)
+    diff = time_monitor(ph) - ph->last_meal;
+    if (flag == 3)
+        ending_c_f(ph);
+    else
+        ending_c(ph);
+    if (flag == 2)
     {
-        printf("%ld: %d is thinking.\n", whattimeisit(), data->ph_id);
-        pthread_mutex_unlock(&data->rules->end_m);
+        printf("%ld %d is thinking\n", time_monitor(ph), ph->ph_id);
         return ;
     }
-    else if (data->rules->end == 0 && flag == 3)
+    else if (flag == 3)
     {
-        printf("%ld: %d is eating.\n", whattimeisit(), data->ph_id);
-        pthread_mutex_unlock(&data->rules->end_m);
-        waiting(time);
+        ph->last_meal = time_monitor(ph);
+        printf("%ld %d is eating\n", time_monitor(ph), ph->ph_id);
+        waiting(time, ph);
+        ending_c_f(ph);
         return ;
-    }
-    else if (data->rules->end == 0)
-    {
-        if ((diff + time) >= data->rules->t_death)
-        {
-            if (flag == 1)
-                printf("%ld: %d is sleeping.\n", whattimeisit(), data->ph_id);
-            waiting((data->last_meal + data->rules->t_death) - whattimeisit());
-            data->rules->end = 1;
-        }
-        else
-        {
-            printf("%ld: %d is sleeping.\n", whattimeisit(), data->ph_id);
-            waiting(time);
-        }
-        pthread_mutex_unlock(&data->rules->end_m);
     }
     else
     {
-        printf("(%d): Someone died: stopping the simulation.\n", data->ph_id);
-        pthread_mutex_unlock(&data->rules->end_m);
-        pthread_exit(EXIT_SUCCESS);
+        if ((diff + time) >= ph->rules->t_death)
+        {
+            ending_c(ph);
+            printf("%ld %d is sleeping\n", time_monitor(ph), ph->ph_id);
+            waiting(ph->rules->t_death - (time_monitor(ph) - ph->last_meal), ph);
+            pthread_mutex_lock(&ph->rules->end_m);
+            ph->rules->end = 1;
+            pthread_mutex_unlock(&ph->rules->end_m);
+            pthread_exit(EXIT_SUCCESS);
+        }
+        else
+        {
+            printf("%ld %d is sleeping\n", time_monitor(ph), ph->ph_id);
+            ending_c(ph);
+            waiting(time, ph);
+        }
     }
-
     return ;
 }

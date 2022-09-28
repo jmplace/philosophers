@@ -11,11 +11,11 @@ END_COLOR	:= \033[0;39m
 # VARIABLES
 
 SRCS	=	ft_atoi.c \
-			ft_print_nl.c \
 			clean_utils.c \
 			list_utils.c \
 			struct_utils.c \
 			routine_utils.c \
+			time_utils.c \
 			main.c
 OBJ		=	${SRCS:.c=.o}
 HEADER	=   philosophers.h
