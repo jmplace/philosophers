@@ -18,15 +18,15 @@ typedef struct      s_list
 
 typedef struct      s_rules
 {
+    int cap;
+    pthread_mutex_t success_m;
+    int success;
+    pthread_mutex_t end_m;
+    int end;
+    long int start;
     long int t_death;
     long int t_eat;
     long int t_sleep;
-    int cap;
-    int success;
-    pthread_mutex_t success_m;
-    long int start;
-    pthread_mutex_t end_m;
-    int end;
 }                   t_rules;
 
 typedef struct      s_ph
@@ -41,7 +41,8 @@ typedef struct      s_ph
 
 // /*      setup           */
 void    list_init(t_ph *ph, t_list **list, int nph);
-t_rules init_rules(char **av);
+t_rules init_rules(char **av, int nph);
+void    struct_init(t_ph **ph, pthread_t ***threads, t_rules **rules, char **av);
 
 /*      time utilities             */
 long int    time_monitor(t_ph *ph);

@@ -13,4 +13,31 @@ void    list_init(t_ph *ph, t_list **list, int nph)
     return ;
 }
 
-void    struct_init(t_ph *ph, t_list **list, t_rules *rules)
+t_rules init_rules(char **av, int nph)
+{
+    t_rules rules;
+
+    pthread_mutex_init(&(rules.end_m), NULL);
+    pthread_mutex_init(&(rules.success_m), NULL);
+    rules.end = 0;
+    rules.start = 0;
+    rules.success = nph;
+    rules.t_death = ft_atoi(av[2]);
+    rules.t_eat = ft_atoi(av[3]);
+    rules.t_sleep = ft_atoi(av[4]);
+    if (av[5])
+        rules.cap = ft_atoi(av[5]);
+    else
+        rules.cap = 0;
+    return (rules);
+}
+
+void    struct_init(t_ph **ph, pthread_t ***threads, t_rules **rules, char **av)
+{
+    *threads = malloc(sizeof(pthread_t *) * ft_atoi(av[1]));
+    *ph = malloc(sizeof(t_ph) * ft_atoi(av[1]));
+    *rules = malloc(sizeof(t_rules));
+    **rules = init_rules(av, ft_atoi(av[1]));
+    (*rules)->start = whattimeisit();
+    return ;
+}

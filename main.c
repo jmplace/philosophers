@@ -48,7 +48,6 @@ void    *philosopher(void *arg)
 
 int main(int ac, char **av)
 {
-    int nph;
     pthread_t **threads;
     t_list *list = NULL;
     t_rules *rules = NULL;
@@ -57,18 +56,12 @@ int main(int ac, char **av)
     int err;
 
     i = 0;
-    if (ac == 0)
+    if (ac < 5 || ac > 6)
         return (0);
     err = 0;
-    nph = ft_atoi(av[1]);
-    threads = malloc(sizeof(pthread_t *) * nph);
-    ph = malloc(sizeof(t_ph) * nph);
-    rules = malloc(sizeof(t_rules));
-    *rules = init_rules(av);
-    rules->success = nph;
-    list_init(ph, &list, nph);
-    rules->start = whattimeisit();
-    while(i != nph)
+    struct_init(&ph, &threads, &rules, av);
+    list_init(ph, &list, ft_atoi(av[1]));
+    while(i != ft_atoi(av[1]))
     {
         threads[i] = malloc(sizeof(pthread_t));
         (ph + i)->meals = 0;
@@ -78,16 +71,13 @@ int main(int ac, char **av)
         i++;
     }
     i = 0;
-    while(i != nph)
+    while(i != ft_atoi(av[1]))
     {
         err = pthread_join(*threads[i], NULL);
         if (err == 1)
-            // printf("thread %d est mort.\n", (i + 1));
-        // else
             printf("le thread %d n'a pas voulu mourir correctement. :'(", (i + 1));
         i++;
     }
     destroy_list(list);
-    // dishcleaner(list);
     return (0);
 }
