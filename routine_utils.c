@@ -4,14 +4,20 @@ int    ending_c(t_ph *ph)
 {
         if (((time_monitor(ph) - ph->last_meal) > ph->rules->t_death) || success_c(ph) == 1)
         {
-            printf("ending simulation here for %d: time: %ld, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), success_c(ph), ph->meals, ph->rules->cap);
             pthread_mutex_lock(&ph->rules->end_m);
-            ph->rules->end = 1;
+            // printf("ending simulation here for %d: time: %ld, end flag: %d, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), ph->rules->end, success_c(ph), ph->meals, ph->rules->cap);
+            if (ph->rules->end != 3)
+                ph->rules->end = 1;
             pthread_mutex_unlock(&ph->rules->end_m);
         }
         pthread_mutex_lock(&ph->rules->end_m);
         if (ph->rules->end != 0)
         {
+            if (ph->rules->end == 1)
+            {
+                ph->rules->end = 3;
+                printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
+            }
             pthread_mutex_unlock(&ph->rules->end_m);
             pthread_exit(EXIT_SUCCESS);
         }
@@ -23,16 +29,22 @@ int    ending_c_f(t_ph *ph)
 {
         if (((time_monitor(ph) - ph->last_meal) > ph->rules->t_death) || success_c(ph) == 1)
         {
-            printf("ending simulation here (_f ver) for %d: time: %ld, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), success_c(ph), ph->meals, ph->rules->cap);
             pthread_mutex_lock(&ph->rules->end_m);
-            ph->rules->end = 1;
+            // printf("ending simulation here (_f ver) for %d: time: %ld, end flag: %d, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), ph->rules->end, success_c(ph), ph->meals, ph->rules->cap);
+            if (ph->rules->end != 3)
+                ph->rules->end = 1;
             pthread_mutex_unlock(&ph->rules->end_m);
         }
         pthread_mutex_lock(&ph->rules->end_m);
         if (ph->rules->end != 0)
         {
-            pthread_mutex_unlock(&ph->rules->end_m);
             unlock_f(ph);
+            if (ph->rules->end == 1)
+            {
+                ph->rules->end = 3;
+                printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
+            }
+            pthread_mutex_unlock(&ph->rules->end_m);
             pthread_exit(EXIT_SUCCESS);
         }
         pthread_mutex_unlock(&ph->rules->end_m);
@@ -95,16 +107,18 @@ void    activity(t_ph *ph, long int time, int flag)
 {
     long int    diff;
 
-    diff = time_monitor(ph) - ph->last_meal;
     // printf("passing through activity %d\n", ph->ph_id);
     if (flag == 3)
         ending_c_f(ph);
     else
         ending_c(ph);
+    diff = time_monitor(ph) - ph->last_meal;
     if (flag == 2)
     {
-        ending_c(ph);
-        printf("%ld %d is thinking\n", time_monitor(ph), ph->ph_id);
+        if (ending_c(ph) == 0)
+            printf("%ld %d is thinking\n", time_monitor(ph), ph->ph_id);
+        if (ph->rules->t_eat > ph->rules->t_sleep)
+            waiting((ph->rules->t_eat - ph->rules->t_sleep), ph);
         return ;
     }
     else if (flag == 3)

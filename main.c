@@ -1,18 +1,5 @@
 #include "philosophers.h"
 
-void    list_init(t_ph *ph, t_list **list, int nph)
-{
-    int i;
-
-    i = 0;
-    while (i != nph)
-    {
-        (ph + i)->fork = addback(&(*list));
-        i++;
-    }
-    return ;
-}
-
 int     meals_c(t_ph *ph)
 {
     if (ph->meals == ph->rules->cap)
@@ -34,7 +21,11 @@ void    *philosopher(void *arg)
     ph = (t_ph *)arg;
     ph->last_meal = 0;
     if (&(ph->fork->fork_m) == &(ph->fork->next->fork_m))
+    {
+        waiting(ph->rules->t_death, ph);
+        printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
         pthread_exit(EXIT_SUCCESS);
+    }
     if (ph->ph_id % 2 != 0)
         waiting(ph->rules->t_eat, ph);
     pthread_mutex_lock(&ph->rules->end_m);
@@ -42,25 +33,13 @@ void    *philosopher(void *arg)
     {
         pthread_mutex_unlock(&ph->rules->end_m);
         ending_c(ph);
-        // printf("bleh %d\n", ph->ph_id);
         lock_f(ph);
-        // ending_c_f(ph);
+        ending_c_f(ph);
         activity(ph, ph->rules->t_eat, 3);
         unlock_f(ph);
         activity(ph, ph->rules->t_sleep, 1);
         activity(ph, 0, 2);
-        // printf("%d hasn't been eating for %ld msec.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal));
-        if ((time_monitor(ph) - ph->last_meal) > ph->rules->t_death)
-        {
-            // printf("(%d): Je suis mort de faim ! (pas mangé depuis %ldmsec)\n", ph->ph_id, (whattimeisit() - ph->last_meal));
-            pthread_mutex_lock(&ph->rules->end_m);
-            ph->rules->end = 1;
-            pthread_mutex_unlock(&ph->rules->end_m);
-            pthread_exit(EXIT_SUCCESS);
-        }
-        // printf("THINKING : MEALS CAP: %d : %d /%d\n", ph->ph_id, ph->meals, ph->rules->cap);
         ending_c(ph);
-        // meals_c(ph);
         pthread_mutex_lock(&ph->rules->end_m);
     }
     pthread_mutex_unlock(&ph->rules->end_m);
