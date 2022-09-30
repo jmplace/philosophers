@@ -18,3 +18,29 @@ long int    time_monitor(t_ph *ph)
 {
     return (whattimeisit() - ph->rules->start);
 }
+
+void    waiting(long int time, t_ph *ph)
+{
+    long int dest;
+
+    dest = whattimeisit() + time;
+    while (whattimeisit() < dest)
+    {
+        ending_c(ph);
+        usleep(100);
+    }
+    return ;
+}
+
+void    waiting_f(long int time, t_ph *ph)
+{
+    long int dest;
+
+    dest = whattimeisit() + time;
+    while (whattimeisit() < dest)
+    {
+        ending_c_f(ph);
+        usleep(100);
+    }
+    return ;
+}

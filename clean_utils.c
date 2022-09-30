@@ -1,16 +1,16 @@
 #include "philosophers.h"
 
-void    tablecleaner(pthread_t **table, int i)
+void    threadscleaner(pthread_t **threads, int i)
 {
     int cpt;
 
     cpt = 0;
     while (cpt < i)
     {
-        free(table[i]);
+        free(threads[i]);
         cpt++;
     }
-    free(table);
+    free(threads);
     return ;
 }
 

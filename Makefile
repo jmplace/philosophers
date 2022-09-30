@@ -19,7 +19,7 @@ SRCS	=	ft_atoi.c \
 			main.c
 OBJ		=	${SRCS:.c=.o}
 HEADER	=   philosophers.h
-NAME	=	philosophers
+NAME	=	philo
 CC		=	cc
 CFLAGS	=	-Wall -Wextra -Werror -O0
 

@@ -21,7 +21,9 @@ typedef struct      s_rules
     long int t_death;
     long int t_eat;
     long int t_sleep;
-    int meals_cap;
+    int cap;
+    int success;
+    pthread_mutex_t success_m;
     long int start;
     pthread_mutex_t end_m;
     int end;
@@ -30,36 +32,41 @@ typedef struct      s_rules
 typedef struct      s_ph
 {
     t_list  *fork;
-    long int last_meal;
     int     ph_id;
+    int     meals;
+    long int last_meal;
     t_rules *rules;
 }                   t_ph;
 
 
 // /*      setup           */
-void    cutlery_init(t_ph *ph, t_list **cutlery, int nph);
+void    list_init(t_ph *ph, t_list **list, int nph);
 t_rules init_rules(char **av);
 
 /*      time utilities             */
 long int    time_monitor(t_ph *ph);
 long int    whattimeisit(void);
 void        waiting(long int time, t_ph *ph);
+void        waiting_f(long int time, t_ph *ph);
+
 
 /*      routine utilities          */
-void    sleep_time(t_ph *ph, long int time, int flag);
+void    activity(t_ph *ph, long int time, int flag);
 void    lock_f(t_ph *ph);
 void    unlock_f(t_ph *ph);
-void    ending_c(t_ph *ph);
-void    ending_c_f(t_ph *ph);
+int    ending_c(t_ph *ph);
+int    ending_c_f(t_ph *ph);
+int     meals_c(t_ph *ph);
+int     success_c(t_ph *ph);
 
 /*      linked list utilities      */
-t_list    *addback(t_list **cutlery);
+t_list    *addback(t_list **list);
 t_list    *find_last(t_list *list);
-void      destroy_list(t_list *cutlery);
+void      destroy_list(t_list *list);
 
 /*      cleaning utilities          */
-void    dishcleaner(t_list *cutlery);
-void    tablecleaner(pthread_t **table, int i);
+void    dishcleaner(t_list *list);
+void    threadscleaner(pthread_t **threads, int i);
 
 /*      printer utilities           */
 void    phprinter(t_ph *ph);
