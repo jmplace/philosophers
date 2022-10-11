@@ -63,7 +63,6 @@ int main(int ac, char **av)
     list_init(ph, &list, ft_atoi(av[1]));
     while(i != ft_atoi(av[1]))
     {
-        threads[i] = malloc(sizeof(pthread_t));
         (ph + i)->meals = 0;
         (ph + i)->ph_id = i + 1;
         (ph + i)->rules = rules;

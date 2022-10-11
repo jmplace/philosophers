@@ -34,7 +34,15 @@ t_rules init_rules(char **av, int nph)
 
 void    struct_init(t_ph **ph, pthread_t ***threads, t_rules **rules, char **av)
 {
+	int i;
+
+	i = 0;
     *threads = malloc(sizeof(pthread_t *) * ft_atoi(av[1]));
+	while (i != ft_atoi(av[1]))
+	{
+        (*threads)[i] = malloc(sizeof(pthread_t));
+		i++;
+	}
     *ph = malloc(sizeof(t_ph) * ft_atoi(av[1]));
     *rules = malloc(sizeof(t_rules));
     **rules = init_rules(av, ft_atoi(av[1]));
