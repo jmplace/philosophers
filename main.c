@@ -35,10 +35,10 @@ void    *philosopher(void *arg)
         ending_c(ph, 0);
         lock_f(ph);
         ending_c(ph, 1);
-        activity(ph, ph->rules->t_eat, 3);
+        a_eat(ph);
         unlock_f(ph);
-        activity(ph, ph->rules->t_sleep, 1);
-        activity(ph, 0, 2);
+        a_sleep(ph);
+        a_think(ph);
         ending_c(ph, 0);
         pthread_mutex_lock(&ph->rules->end_m);
     }
@@ -55,20 +55,14 @@ int main(int ac, char **av)
     int i;
     int err;
 
-    i = 0;
+    i = -1;
     if (ac < 5 || ac > 6)
         return (0);
     err = 0;
     struct_init(&ph, &threads, &rules, av);
-    list_init(ph, &list, ft_atoi(av[1]));
-    while(i != ft_atoi(av[1]))
-    {
-        (ph + i)->meals = 0;
-        (ph + i)->ph_id = i + 1;
-        (ph + i)->rules = rules;
+    ph_init(ph, &list, ft_atoi(av[1]), rules);
+    while(++i != ft_atoi(av[1]))
         pthread_create(threads[i], NULL, philosopher, (ph + i));
-        i++;
-    }
     i = 0;
     while(i != ft_atoi(av[1]))
     {

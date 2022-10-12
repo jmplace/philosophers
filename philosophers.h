@@ -40,7 +40,7 @@ typedef struct      s_ph
 
 
 // /*      setup           */
-void    list_init(t_ph *ph, t_list **list, int nph);
+void    ph_init(t_ph *ph, t_list **list, int nph, t_rules *rules);
 t_rules init_rules(char **av, int nph);
 void    struct_init(t_ph **ph, pthread_t ***threads, t_rules **rules, char **av);
 
@@ -52,12 +52,14 @@ void        waiting_f(long int time, t_ph *ph);
 
 
 /*      routine utilities          */
-void    activity(t_ph *ph, long int time, int flag);
+int     a_sleep(t_ph *ph);
+int     a_eat(t_ph *ph);
+int     a_think(t_ph *ph);
 void    lock_f(t_ph *ph);
 void    unlock_f(t_ph *ph);
 int     ending_c(t_ph *ph, int ulock_f);
 int     meals_c(t_ph *ph);
-int     success_c(t_ph *ph);
+int     success_c(t_ph *ph, int ulock_f);
 
 /*      linked list utilities      */
 t_list    *addback(t_list **list);

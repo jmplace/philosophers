@@ -1,12 +1,15 @@
 #include "philosophers.h"
 
-void    list_init(t_ph *ph, t_list **list, int nph)
+void    ph_init(t_ph *ph, t_list **list, int nph, t_rules *rules)
 {
     int i;
 
     i = 0;
     while (i != nph)
     {
+        (ph + i)->meals = 0;
+        (ph + i)->ph_id = i + 1;
+        (ph + i)->rules = rules;
         (ph + i)->fork = addback(&(*list));
         i++;
     }
