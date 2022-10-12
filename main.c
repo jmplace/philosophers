@@ -4,7 +4,7 @@ int     meals_c(t_ph *ph)
 {
     if (ph->meals == ph->rules->cap)
         {
-            // printf("(%d): J'ai plus faim ! (%d repas)\n", ph->ph_id, meals);
+            // printf("(%d): J'ai plus faim ! (%d repas)\n", ph->ph_id, ph->meals);
             pthread_mutex_lock(&ph->rules->success_m);
             ph->rules->success--;
             // printf("success flag: %d\n", ph->rules->success);
@@ -32,14 +32,14 @@ void    *philosopher(void *arg)
     while (ph->rules->end == 0)
     {
         pthread_mutex_unlock(&ph->rules->end_m);
-        ending_c(ph);
+        ending_c(ph, 0);
         lock_f(ph);
-        ending_c_f(ph);
+        ending_c(ph, 1);
         activity(ph, ph->rules->t_eat, 3);
         unlock_f(ph);
         activity(ph, ph->rules->t_sleep, 1);
         activity(ph, 0, 2);
-        ending_c(ph);
+        ending_c(ph, 0);
         pthread_mutex_lock(&ph->rules->end_m);
     }
     pthread_mutex_unlock(&ph->rules->end_m);

@@ -55,8 +55,7 @@ void        waiting_f(long int time, t_ph *ph);
 void    activity(t_ph *ph, long int time, int flag);
 void    lock_f(t_ph *ph);
 void    unlock_f(t_ph *ph);
-int    ending_c(t_ph *ph);
-int    ending_c_f(t_ph *ph);
+int     ending_c(t_ph *ph, int ulock_f);
 int     meals_c(t_ph *ph);
 int     success_c(t_ph *ph);
 

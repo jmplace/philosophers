@@ -26,7 +26,7 @@ void    waiting(long int time, t_ph *ph)
     dest = whattimeisit() + time;
     while (whattimeisit() < dest)
     {
-        ending_c(ph);
+        ending_c(ph, 0);
         usleep(100);
     }
     return ;
@@ -39,7 +39,7 @@ void    waiting_f(long int time, t_ph *ph)
     dest = whattimeisit() + time;
     while (whattimeisit() < dest)
     {
-        ending_c_f(ph);
+        ending_c(ph, 1);
         usleep(100);
     }
     return ;
