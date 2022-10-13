@@ -22,6 +22,7 @@ t_rules init_rules(char **av, int nph)
 
     pthread_mutex_init(&(rules.end_m), NULL);
     pthread_mutex_init(&(rules.success_m), NULL);
+    pthread_mutex_init(&(rules.start_m), NULL);
     rules.end = 0;
     rules.start = 0;
     rules.success = nph;

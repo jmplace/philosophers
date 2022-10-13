@@ -22,7 +22,9 @@ typedef struct      s_rules
     pthread_mutex_t success_m;
     int success;
     pthread_mutex_t end_m;
+    pthread_mutex_t start_m;
     int end;
+    int launch;
     long int start;
     long int t_death;
     long int t_eat;
