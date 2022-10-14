@@ -16,18 +16,23 @@ int     meals_c(t_ph *ph)
 
 void    *philosopher(void *arg)
 {
-    t_ph *ph;
+   t_ph *ph;
 
     ph = (t_ph *)arg;
-    ph->last_meal = 0;
     if (&(ph->fork->fork_m) == &(ph->fork->next->fork_m))
     {
         waiting(ph->rules->t_death, ph);
         printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
         pthread_exit(EXIT_SUCCESS);
     }
+    pthread_mutex_lock(&ph->rules->start_m);
+    ph->rules->start = whattimeisit();
+    pthread_mutex_unlock(&ph->rules->start_m);
+    // printf("START = %ld, time monitor = %ld, NOW - START = %ld\n", ph->rules->start, time_monitor(ph), (whattimeisit() - ph->rules->start));
+    ph->last_meal = time_monitor(ph);
     if (ph->ph_id % 2 != 0)
         waiting(ph->rules->t_eat, ph);
+    // printf("%ld --> [%d]\n", time_monitor(ph), ph->ph_id);
     pthread_mutex_lock(&ph->rules->end_m);
     while (ph->rules->end == 0)
     {
@@ -61,8 +66,10 @@ int main(int ac, char **av)
     err = 0;
     struct_init(&ph, &threads, &rules, av);
     ph_init(ph, &list, ft_atoi(av[1]), rules);
+    pthread_mutex_lock(&rules->start_m);
     while(++i != ft_atoi(av[1]))
         pthread_create(threads[i], NULL, philosopher, (ph + i));
+    pthread_mutex_unlock(&rules->start_m);
     i = 0;
     while(i != ft_atoi(av[1]))
     {
