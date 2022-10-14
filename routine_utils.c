@@ -7,7 +7,7 @@ int    ending_c(t_ph *ph, int ulock_f)
         if (((time_monitor(ph) - ph->last_meal) > ph->rules->t_death))
         {
             pthread_mutex_lock(&ph->rules->end_m);
-            // printf("ending simulation here for %d: time: %ld, end flag: %d, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), ph->rules->end, success_c(ph), ph->meals, ph->rules->cap);
+            printf("ending simulation here for %d: time: %ld, end flag: %d, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), ph->rules->end, success_c(ph, 0), ph->meals, ph->rules->cap);
             if (ph->rules->end != 3)
                 ph->rules->end = 1;
             pthread_mutex_unlock(&ph->rules->end_m);
@@ -34,12 +34,20 @@ void    lock_f(t_ph *ph)
     if (ph->ph_id % 2 != 0)
     {
         if (pthread_mutex_lock(&ph->fork->fork_m) == 0)
+        {
+            printf("%ld %d PICKED HIS LEFT FORK\n", time_monitor(ph), ph->ph_id);
             pthread_mutex_lock(&ph->fork->next->fork_m);
+            printf("%ld %d PICKED HIS RIGHT FORK\n", time_monitor(ph), ph->ph_id);
+        }
     }
     else
     {
         if (pthread_mutex_lock(&ph->fork->next->fork_m) == 0)
+        {
+            printf("%ld %d PICKED HIS RIGHT FORK\n", time_monitor(ph), ph->ph_id);
             pthread_mutex_lock(&ph->fork->fork_m);
+            printf("%ld %d PICKED HIS LEFT FORK\n", time_monitor(ph), ph->ph_id);
+        }
     }
     return ;
 }
@@ -112,6 +120,7 @@ int     a_sleep(t_ph *ph)
 
 int     a_eat(t_ph *ph)
 {
+        printf("%ld %d IS DOING ANOTHER CHECK BEFORE EATING. last meal = %ld, diff = %ld\n", time_monitor(ph), ph->ph_id, ph->last_meal, (time_monitor(ph) - ph->last_meal));
         // printf("MEALS CAP: %d : %d /%d\n", ph->ph_id, ph->meals, ph->rules->cap);
         ending_c(ph, 1);
         ph->last_meal = time_monitor(ph);

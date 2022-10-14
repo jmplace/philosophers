@@ -34,7 +34,7 @@ void    *philosopher(void *arg)
         pthread_mutex_unlock(&ph->rules->end_m);
         ending_c(ph, 0);
         lock_f(ph);
-        ending_c(ph, 1);
+        // ending_c(ph, 1);
         a_eat(ph);
         unlock_f(ph);
         a_sleep(ph);
