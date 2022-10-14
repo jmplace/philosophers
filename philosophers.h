@@ -9,6 +9,7 @@
 
 #define RED "\x1B[31m"
 #define WHT "\x1B[0m"
+#define MONITORED 999
 
 typedef struct      s_list
 {

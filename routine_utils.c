@@ -8,7 +8,7 @@ int    ending_c(t_ph *ph, int ulock_f)
         {
             pthread_mutex_lock(&ph->rules->end_m);
             // printf("ending simulation here for %d: time: %ld, end flag: %d, success flag: %d with %d/%d meals.\n", ph->ph_id, (time_monitor(ph) - ph->last_meal), ph->rules->end, success_c(ph), ph->meals, ph->rules->cap);
-            if (ph->rules->end != 3)
+            if (ph->rules->end != MONITORED)
                 ph->rules->end = 1;
             pthread_mutex_unlock(&ph->rules->end_m);
         }
@@ -19,7 +19,7 @@ int    ending_c(t_ph *ph, int ulock_f)
                 unlock_f(ph);
             if (ph->rules->end == 1)
             {
-                ph->rules->end = 3;
+                ph->rules->end = MONITORED;
                 printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
             }
             pthread_mutex_unlock(&ph->rules->end_m);
@@ -31,31 +31,44 @@ int    ending_c(t_ph *ph, int ulock_f)
 
 void    lock_f(t_ph *ph)
 {
-    if (ph->ph_id % 2 != 0)
-    {
-        if (pthread_mutex_lock(&ph->fork->fork_m) == 0)
-            pthread_mutex_lock(&ph->fork->next->fork_m);
+    int done = 0;
+    pthread_mutex_t * first ;
+    pthread_mutex_t * second;
+
+    if (ph->ph_id % 2 != 0) {
+        first = &ph->fork->fork_m;
+        second = &ph->fork->next->fork_m;
+    } else {
+        first = &ph->fork->next->fork_m;
+        second = &ph->fork->fork_m;
     }
-    else
-    {
-        if (pthread_mutex_lock(&ph->fork->next->fork_m) == 0)
-            pthread_mutex_lock(&ph->fork->fork_m);
-    }
+
+    pthread_mutex_lock(first);
+//    if (ph->ph_id == MONITORED) printf("%9ld ---------------> %d left taken\n", time_monitor(ph));
+    pthread_mutex_lock(second);
+//    if (ph->ph_id == MONITORED) printf("%9ld ---------------> %d right taken\n", time_monitor(ph));
+
     return ;
 }
 
 void    unlock_f(t_ph *ph)
 {
-    if (ph->ph_id % 2 != 0)
-    {
-        pthread_mutex_unlock(&ph->fork->fork_m);
-        pthread_mutex_unlock(&ph->fork->next->fork_m);
+    pthread_mutex_t * first ;
+    pthread_mutex_t * second;
+
+    if (ph->ph_id % 2 != 0) {
+        first = &ph->fork->fork_m;
+        second = &ph->fork->next->fork_m;
+    } else {
+        first = &ph->fork->next->fork_m;
+        second = &ph->fork->fork_m;
     }
-    else
-    {
-        pthread_mutex_unlock(&ph->fork->next->fork_m);
-        pthread_mutex_unlock(&ph->fork->fork_m);
-    }
+
+    pthread_mutex_unlock(first);
+    pthread_mutex_unlock(second);
+//    if (ph->ph_id == MONITORED)  printf("%9ld ---------------> %d right released\n", time_monitor(ph));
+//    if (ph->ph_id == MONITORED)  printf("%9ld ---------------> %d left released\n", time_monitor(ph));
+
     return ;
 }
 

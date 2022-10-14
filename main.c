@@ -32,24 +32,32 @@ void    *philosopher(void *arg)
         ph->rules->start = whattimeisit();
     if (ph->ph_id % 2 != 0)
         waiting(ph->rules->t_eat, ph);
-    printf("%ld --> [%d]\n", time_monitor(ph), ph->ph_id);
+//    printf("%ld --> [%d]\n", time_monitor(ph), ph->ph_id);
     pthread_mutex_lock(&ph->rules->end_m);
     while (ph->rules->end == 0)
     {
         pthread_mutex_unlock(&ph->rules->end_m);
         ending_c(ph, 0);
-        if (ph->ph_id == 3)
+        if (ph->ph_id == MONITORED)
             printf("%ld PHILO %d IS TRYING TO LOCK HIS FORKS\n", time_monitor(ph), ph->ph_id);
         lock_f(ph);
-        if (ph->ph_id == 3)
-            printf("%ld PHILO %d SUCCEEDED\n", time_monitor(ph), ph->ph_id);
+        if (ph->ph_id == MONITORED)
+            printf("%ld PHILO %d SUCCEEDED\n", time_monitor(ph), ph->ph_id-1);
+        if (ph->ph_id == MONITORED+1)
+            printf("%ld PHILO %d TOOK LEFT FORK\n", time_monitor(ph), ph->ph_id);
+        if (ph->ph_id == MONITORED-1)
+            printf("%ld PHILO %d TOOK RIGHT FORK\n", time_monitor(ph), ph->ph_id);
         ending_c(ph, 1);
         a_eat(ph);
-        if (ph->ph_id == 3)
+        if (ph->ph_id == MONITORED)
             printf("%ld PHILO %d JUST ATE\n", time_monitor(ph), ph->ph_id);
         unlock_f(ph);
-        if (ph->ph_id == 3)
+        if (ph->ph_id == MONITORED)
             printf("%ld PHILO %d UNLOCKED HIS FORKS\n", time_monitor(ph), ph->ph_id);
+        if (ph->ph_id == MONITORED+1)
+            printf("%ld PHILO %d RELEASED LEFT FORK\n", time_monitor(ph), ph->ph_id);
+        if (ph->ph_id == MONITORED-1)
+            printf("%ld PHILO %d RELEASED RIGHT FORK\n", time_monitor(ph), ph->ph_id);
         a_sleep(ph);
         a_think(ph);
         ending_c(ph, 0);
