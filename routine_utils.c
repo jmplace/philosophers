@@ -34,24 +34,10 @@ int    ending_c(t_ph *ph, int ulock_f)
 
 void    lock_f(t_ph *ph)
 {
-    pthread_mutex_t * first;
-    pthread_mutex_t * second;
-
-    if (ph->ph_id % 2 != 0)
-    {
-        first = &ph->fork->fork_m;
-        second = &ph->fork->next->fork_m;
-    }
-    else
-    {
-        first = &ph->fork->next->fork_m;
-        second = &ph->fork->fork_m;
-    }
-
-    if (pthread_mutex_lock(first) == 0)
+    if (pthread_mutex_lock(ph->first) == 0)
     {
 //            printf("%ld %d PICKED HIS FIRST FORK\n", time_monitor(ph), ph->ph_id);
-        pthread_mutex_lock(second);
+        pthread_mutex_lock(ph->second);
 //            printf("%ld %d PICKED HIS SECOND FORK\n", time_monitor(ph), ph->ph_id);
     }
     return ;
@@ -59,22 +45,8 @@ void    lock_f(t_ph *ph)
 
 void    unlock_f(t_ph *ph)
 {
-    pthread_mutex_t * first;
-    pthread_mutex_t * second;
-
-    if (ph->ph_id % 2 != 0)
-    {
-        first = &ph->fork->fork_m;
-        second = &ph->fork->next->fork_m;
-    }
-    else
-    {
-        first = &ph->fork->next->fork_m;
-        second = &ph->fork->fork_m;
-    }
-
-    pthread_mutex_unlock(first);
-    pthread_mutex_unlock(second);
+    pthread_mutex_unlock(ph->first);
+    pthread_mutex_unlock(ph->second);
     return ;
 }
 

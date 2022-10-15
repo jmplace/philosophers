@@ -7,10 +7,25 @@ void    ph_init(t_ph *ph, t_list **list, int nph, t_rules *rules)
     i = 0;
     while (i != nph)
     {
+        (ph + i)->fork = addback(&(*list));
+        i++;
+    }
+    i = 0;
+    while (i != nph)
+    {
         (ph + i)->meals = 0;
         (ph + i)->ph_id = i + 1;
         (ph + i)->rules = rules;
-        (ph + i)->fork = addback(&(*list));
+        if ((ph + i)->ph_id % 2 != 0)
+        {
+            (ph + i)->first = &(ph + i)->fork->fork_m;
+            (ph + i)->second = &(ph + i)->fork->next->fork_m;
+        }
+        else
+        {
+            (ph + i)->first = &(ph + i)->fork->next->fork_m;
+            (ph + i)->second = &(ph + i)->fork->fork_m;
+        }
         i++;
     }
     return ;

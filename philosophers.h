@@ -41,6 +41,8 @@ typedef struct      s_ph
     t_rules *rules;
 //    pthread_mutex_t private_m;
     long int wakeup;
+    pthread_mutex_t *first;
+    pthread_mutex_t *second;
 }                   t_ph;
 
 
