@@ -22,11 +22,12 @@ void    *philosopher(void *arg)
     if (&(ph->fork->fork_m) == &(ph->fork->next->fork_m))
     {
         waiting(ph->rules->t_death, ph);
-        printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
+//        printf("%ld %d died\n", time_monitor(ph), ph->ph_id);
+        report(time_monitor(ph), ph->ph_id, "died");
         pthread_exit(EXIT_SUCCESS);
     }
     pthread_mutex_lock(&ph->rules->start_m);
-    ph->rules->start = whattimeisit();
+//    ph->rules->start = whattimeisit();
     pthread_mutex_unlock(&ph->rules->start_m);
     // printf("START = %ld, time monitor = %ld, NOW - START = %ld\n", ph->rules->start, time_monitor(ph), (whattimeisit() - ph->rules->start));
     ph->last_meal = time_monitor(ph);
@@ -64,8 +65,10 @@ int main(int ac, char **av)
     if (ac < 5 || ac > 6)
         return (0);
     err = 0;
+    report_init();
     struct_init(&ph, &threads, &rules, av);
     ph_init(ph, &list, ft_atoi(av[1]), rules);
+    ph->rules->start = whattimeisit();
     pthread_mutex_lock(&rules->start_m);
     while(++i != ft_atoi(av[1]))
         pthread_create(threads[i], NULL, philosopher, (ph + i));
@@ -75,9 +78,11 @@ int main(int ac, char **av)
     {
         err = pthread_join(*threads[i], NULL);
         if (err == 1)
-            printf("le thread %d n'a pas voulu mourir correctement. :'(", (i + 1));
+//            printf("le thread %d n'a pas voulu mourir correctement. :'(", (i + 1));
+            report(1000000L, i+1, "le thread %d n'a pas voulu mourir correctement.");
         i++;
     }
+    report_final();
     destroy_list(list);
     return (0);
 }

@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include "reports.h"
 
 #define RED "\x1B[31m"
 #define WHT "\x1B[0m"
@@ -28,6 +29,7 @@ typedef struct      s_rules
     long int t_death;
     long int t_eat;
     long int t_sleep;
+//    pthread_mutex_t clock_m;
 }                   t_rules;
 
 typedef struct      s_ph
@@ -37,6 +39,8 @@ typedef struct      s_ph
     int     meals;
     long int last_meal;
     t_rules *rules;
+//    pthread_mutex_t private_m;
+    long int wakeup;
 }                   t_ph;
 
 
